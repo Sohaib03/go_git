@@ -26,6 +26,11 @@ func Call(args []string) {
 	switch args[0] {
 	case "init":
 		fmt.Println("Initializing repository...")
+		if len(args) > 1 {
+			pkg.RepoCreate(args[1])
+		} else {
+			pkg.RepoCreate(".")
+		}
 	case "commit":
 		fmt.Println("Committing changes...")
 	case "status":
