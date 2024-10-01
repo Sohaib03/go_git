@@ -16,12 +16,15 @@ func Call(args []string) {
 		return
 	}
 
-	_, err := pkg.GetRepository(".", false)
+	// repo, err := pkg.GetRepository(".", false)
 
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
+	// if err != nil {
+	// 	fmt.Println("Error:", err)
+	// 	return
+	// }
+
+	// _, err = pkg.ObjectRead(repo, "f73c96d8a7de0a95b3be41d186feef265c63a980")
+	// fmt.Println(err)
 
 	switch args[0] {
 	case "init":
@@ -35,6 +38,15 @@ func Call(args []string) {
 		fmt.Println("Committing changes...")
 	case "status":
 		fmt.Println("Checking status...")
+		pkg.RepoFind(".", true)
+
+	case "hash":
+		fmt.Println("Hashing file...")
+		pkg.CmdHashFile(args)
+
+	case "cat":
+		fmt.Println("Reading file...")
+		pkg.CmdCatFile(args)
 	default:
 		fmt.Println("Unknown command:", args[0])
 	}

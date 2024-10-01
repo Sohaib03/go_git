@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 
 	// "github.com/bigkevmcd/go-configparser"
 	"gopkg.in/ini.v1"
@@ -57,13 +58,14 @@ func repoDir(r *Repository, mkdir bool, paths ...string) (string, error) {
 
 }
 
+// Initializes a Git repository at rpath; force skips validation checks.
 func (r *Repository) init(rpath string, force bool) error {
 	r.worktree = rpath
 	r.gitdir = path.Join(rpath, ".git")
 	// check if the directory exists
 	if !force {
 		if stat, err := os.Stat(r.gitdir); err != nil || !stat.IsDir() {
-			return fmt.Errorf("Invalid Git Repository", r.gitdir)
+			return fmt.Errorf("Invalid Git Repository %s\n", r.gitdir)
 		}
 	}
 	conf, err := ini.Load(".git/config")
@@ -179,4 +181,30 @@ func writeDefaultConfig(filepath string) error {
 	config.Section("core").Key("filemode").SetValue("false")
 	config.Section("core").Key("bare").SetValue("false")
 	return config.SaveTo(filepath)
+}
+
+func RepoFind(cpath string, required bool) *Repository {
+	realPath, err := filepath.Abs(cpath)
+	if err != nil {
+		fmt.Println("Error getting absolute path")
+		return nil
+	}
+	for {
+		gitPath := path.Join(realPath, ".git")
+		if stat, err := os.Stat(gitPath); err == nil && stat.IsDir() {
+			fmt.Println("Repository Found at ", realPath)
+			repo := &Repository{}
+			repo.init(realPath, false)
+			return repo
+		}
+		fmt.Println("Not Found at ", realPath)
+		if realPath == "/" || realPath == "." || realPath == filepath.Dir(realPath) {
+			if required {
+				fmt.Println("No repository found")
+				return nil
+			}
+			return nil
+		}
+		realPath = filepath.Dir(realPath)
+	}
 }
